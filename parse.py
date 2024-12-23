@@ -1,5 +1,6 @@
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
+import asyncio
 
 template = (
     "You are tasked with extracting specific information from the following text content: {dom_content}. "
@@ -25,6 +26,25 @@ def parse_with_ollama(dom_chunks, parse_description):
             {"dom_content": chunk, "parse_description": parse_description}
         )
         parsed_results.append(response)
+
+    print('Done!')
+    return "\n".join(parsed_results)
+
+async def async_parse_with_ollama(dom_chunks, parse_description):
+    prompt = ChatPromptTemplate.from_template(template)
+    chain = prompt | model
+
+    async def process_chunk(chunk, idx):
+        print(f"Parsing batch: {idx} of {len(dom_chunks)}")
+        response = await chain.ainvoke(
+            {"dom_content": chunk, "parse_description": parse_description}
+        )
+        return response
+
+    tasks = [
+        process_chunk(chunk, idx) for idx, chunk in enumerate(dom_chunks, start=1)
+        ]
+    parsed_results = await asyncio.gather(*tasks)
 
     print('Done!')
     return "\n".join(parsed_results)
