@@ -1,6 +1,7 @@
 streamlit 
 langchain 
 langchain_ollama
+selenim-driverless
 beautifulsoup4
 lxml 
 html5lib
